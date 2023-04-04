@@ -1,0 +1,10 @@
+sample:
+  description: Bluetooth Low Energy NUS client for simulation
+  name: BLE NUC client
+tests:
+  sample.bluetooth.central_uart:
+    build_only: true
+    integration_platforms:
+      - nrf52_bsim
+    platform_allow: nrf52_bsim
+    tags: bluetooth ci_build
