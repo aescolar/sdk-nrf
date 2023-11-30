@@ -55,12 +55,6 @@ static void ble_data_sent(struct bt_nus_client *nus, uint8_t err,
 {
 	ARG_UNUSED(nus);
 
-	struct nus_input_data_t *buf;
-
-	/* Retrieve buffer context. */
-	buf = CONTAINER_OF(data, struct nus_input_data_t, data);
-	k_free(buf);
-
 	k_sem_give(&nus_write_sem);
 
 	if (err) {
@@ -373,12 +367,16 @@ int main(void)
 	}
 	LOG_INF("Bluetooth initialized");
 
-	int (*module_init[])(void) = {scan_init, nus_client_init};
-	for (size_t i = 0; i < ARRAY_SIZE(module_init); i++) {
-		err = (*module_init[i])();
-		if (err) {
-			return 0;
-		}
+	err = scan_init();
+	if (err != 0) {
+		LOG_ERR("scan_init failed (err %d)", err);
+		return 0;
+	}
+
+	err = nus_client_init();
+	if (err != 0) {
+		LOG_ERR("nus_client_init failed (err %d)", err);
+		return 0;
 	}
 
 	printk("Starting Bluetooth Babblesim NUS client\n");
@@ -406,6 +404,8 @@ int main(void)
 		if (err) {
 			LOG_WRN("NUS send timeout");
 		}
+
+		k_free(buf);
 	}
 }
 
